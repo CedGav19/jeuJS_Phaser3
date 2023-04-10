@@ -1,0 +1,32 @@
+* {
+  text-align: center;
+}
+
+body {
+  display: block;
+  background-color: rgb(63, 63, 78);
+  background-image: linear-gradient(to rigth, rgb(43, 43, 95), rgb(0, 0, 0));
+}
+canvas {
+  border: solid black 5px;
+  z-index: 1;
+}
+
+.menuFin {
+  display: none;
+  margin: 100px auto;
+  padding: 20px;
+  width: 300px;
+  height: auto;
+
+  background-color: darkgoldenrod;
+  border-radius: 10px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 50%);
+}
+#GameOver {
+  color: red;
+  font-weight: bold;
+  font-size: 50px;
+}
