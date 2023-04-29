@@ -7,12 +7,35 @@ diviser le jeu en plusieurs zone horizontale => pouvoir verifier que le jeu est 
 
 gerer les briques et les zapper 
 
+remplacer les spikes apr des zapper horizontal
+
+
 pour les briques , faire en sorte que barry recule a cause de la collision et si il 
-touche la fin du mur il meurt ( peut etre du feu)
+touche la fin du mur il meurt ( peut etre du feu)  
+du coup sa vitesse augmente quand il est pas a une certaine positiona la fin ca 
 
-du coup sa vitesse augmente quand il est pas a une certaine position
 
+
+sprite de chute lorsque gravity de barry est positive 
  */
+
+restart = document.getElementById("restart"); // selectionne le bouton restart
+var zone1; // zone de 1 a H de bas en haut
+var zone2;
+var zone3;
+var zone4;
+
+var idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
+var estEntrainDeCourir = true;
+var monnaie;
+var Barry;
+var score = 0;
+var evt;
+var Vitesse = -200;
+var vie = 1;
+var nbal = 1500;
+var nbalPieces = 3000;
+var dernierePiece;
 
 const config = {
   type: Phaser.AUTO,
@@ -33,21 +56,7 @@ const config = {
   },
 };
 
-restart = document.getElementById("restart"); // selectionne le bouton restart
-
-var idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
 var game = new Phaser.Game(config);
-var estEntrainDeCourir = true;
-var monnaie;
-var Barry;
-var score = 0;
-var evt;
-var Vitesse = -200;
-var vie = 1;
-var nbal = 1500;
-var nbalPieces = 3000;
-var dernierePiece;
-console.log(game);
 
 /*PRELOAD*/
 function preload() {
@@ -74,11 +83,20 @@ function preload() {
   this.load.image("background", "./assets/background.png");
   this.load.image("spikes", "./assets/spikes.png");
   this.load.image("brique", "./assets/brique.png");
+  this.load.image("rocket", "./assets/rocket.png");
 }
 
 function create() {
   /*Creation sol*/
   this.add.image(game.config.width / 2, game.config.height / 2, "background");
+
+  fusee = this.physics.add.image(
+    game.config.width / 2,
+    game.config.height / 2,
+    "rocket"
+  );
+  fusee.setVelocityX(2 * Vitesse);
+  fusee.body.allowGravity = false;
   ground = this.physics.add.image(
     game.config.width / 2 + 100,
     game.config.height - 40,
@@ -96,16 +114,8 @@ function create() {
   spike.body.allowGravity = false;
   /*creation des briques*/
   plateformes = this.physics.add.group();
-  briques = plateformes.create(config.width / 2, config.height / 2, "brique");
-  briques.body.allowGravity = false;
-  briques.setBodySize(235, 115);
+  briques = plateformes.create(-300, 0, "brique");
   briques.setVelocityX(Vitesse);
-  briques.setImmovable(true);
-  br = plateformes.create(config.width / 2 + 235, config.height / 2, "brique");
-  br.body.allowGravity = false;
-  br.setBodySize(235, 115);
-  br.setVelocityX(Vitesse);
-  br.setImmovable(true);
   /*creation des pieces*/
 
   pieces = this.physics.add.group();
@@ -162,6 +172,7 @@ function create() {
 
   /* COLLISION ADD */
   this.physics.add.collider(ground, Barry, Courir);
+  this.physics.add.collider(plateformes, Barry, Courir);
   this.physics.add.overlap(Barry, pieces, collectPieces, null, this);
   this.physics.add.collider(ground, spike);
   this.physics.add.collider(Barry, spike, perdu);
@@ -188,6 +199,11 @@ function update() {
     console.log("apparition de spike");
     ajoutSpike.call(this);
     console.log(monnaie.x);
+  }
+  if (briques.x < -nbalPieces) {
+    console.log("apparition de briques");
+    /*Appartion des spikes*/
+    ajoutBriques.call(this);
   }
   if (monnaie.x < -nbalPieces) {
     console.log("apparition de piece");
@@ -291,6 +307,28 @@ function ajoutPieces() {
 
   nbalPieces = Math.random() * 6000 + 150;
 }
+
+function ajoutBriques() {
+  briques = plateformes.create(
+    game.config.width * 1.5,
+    config.height / 2,
+    "brique"
+  );
+  briques.body.allowGravity = false;
+  briques.setBodySize(235, 115);
+  briques.setVelocityX(Vitesse);
+  briques.setImmovable(true);
+  br = plateformes.create(
+    config.width * 1.5 + 235,
+    config.height / 2,
+    "brique"
+  );
+  br.body.allowGravity = false;
+  br.setBodySize(235, 115);
+  br.setVelocityX(Vitesse);
+  br.setImmovable(true);
+}
+
 function collectPieces(barry, piece) {
   if (piece === monnaie) {
     monnaie = pieces.create(-5, game.config.height, "piece");
