@@ -7,7 +7,6 @@ diviser le jeu en plusieurs zone horizontale => pouvoir verifier que le jeu est 
 
 gerer les briques et les zapper 
 
-remplacer les spikes apr des zapper horizontal
 
 
 pour les briques , faire en sorte que barry recule a cause de la collision et si il 
@@ -36,6 +35,7 @@ var vie = 1;
 var nbal = 1500;
 var nbalPieces = 3000;
 var dernierePiece;
+hauteurrocket = 500;
 
 const config = {
   type: Phaser.AUTO,
@@ -81,7 +81,6 @@ function preload() {
 
   this.load.image("ground", "./assets/ground.png");
   this.load.image("background", "./assets/background.png");
-  this.load.image("spikes", "./assets/spikes.png");
   this.load.image("brique", "./assets/brique.png");
   this.load.image("rocket", "./assets/rocket.png");
 }
@@ -103,15 +102,6 @@ function create() {
     "ground"
   );
   ground.setCollideWorldBounds(true);
-
-  /*Creation du premier Spike*/
-  spike = this.physics.add.image(
-    game.config.width * 1.5,
-    game.config.height - ground.height * 1.5,
-    "spikes"
-  );
-  spike.setVelocity(Vitesse, 0);
-  spike.body.allowGravity = false;
   /*creation des briques*/
   plateformes = this.physics.add.group();
   briques = plateformes.create(-300, 0, "brique");
@@ -174,8 +164,6 @@ function create() {
   this.physics.add.collider(ground, Barry, Courir);
   this.physics.add.collider(plateformes, Barry, Courir);
   this.physics.add.overlap(Barry, pieces, collectPieces, null, this);
-  this.physics.add.collider(ground, spike);
-  this.physics.add.collider(Barry, spike, perdu);
   this.physics.add.collider(Barry, zapper, perdu);
   this.physics.add.collider(Barry, plateformes);
 
@@ -194,20 +182,22 @@ function update() {
     Barry.setTexture("barryVol");
     Barry.anims.play("barryJetpack");
   }
-  if (spike.x < -nbal) {
-    /*Appartion des spikes*/
-    console.log("apparition de spike");
-    ajoutSpike.call(this);
-    console.log(monnaie.x);
+  if (zapper.x < -nbal) {
+    console.log("apparition de zapper sol    : " + nbal);
+
+    ajoutZapper.call(this);
+    console.log("apres ajoutzap" + (nbal % 2));
+    if (int(nbal % 2) == 0) {
+      console.log("dans le modulo");
+      ajoutRocket.call(this); // fais apparaitre les rocket 6 fois moins souvent que les zapper
+    }
   }
   if (briques.x < -nbalPieces) {
     console.log("apparition de briques");
-    /*Appartion des spikes*/
     ajoutBriques.call(this);
   }
   if (monnaie.x < -nbalPieces) {
     console.log("apparition de piece");
-    /*Appartion des spikes*/
     ajoutPieces.call(this);
   }
   if (vie === 0) {
@@ -237,17 +227,32 @@ function gameOver() {
   });
 }
 
-function ajoutSpike() {
-  spike = this.physics.add.image(
+function ajoutZapper() {
+  zapper = this.physics.add.sprite(
     game.config.width * 1.5,
-    game.config.height - ground.height * 1.5,
-    "spikes"
+    game.config.height - ground.height - 50,
+    "zap"
   );
-  spike.setVelocity(Vitesse, 0);
-  spike.body.allowGravity = false;
-  this.physics.add.collider(ground, spike);
-  this.physics.add.collider(Barry, spike, perdu);
+  zapper.setVelocityX(Vitesse);
+  zapper.body.allowGravity = false;
+  zapper.anims.play("zapper");
+  tmpheightzap = zapper.height;
+  tmpwidthzap = zapper.width;
+  zapper.setBodySize(zapper.height, zapper.width);
+  zapper.angle = 90;
+  this.physics.add.collider(Barry, zapper, perdu);
   nbal = Math.random() * 6000 + 150;
+}
+
+function ajoutRocket() {
+  console.log("ajout de fusee ");
+  fusee = this.physics.add.sprite(
+    game.config.width * 2, // permet de'avoir le temps de la voir venir
+    game.config.height - hauteurrocket,
+    "rocket"
+  );
+  fusee.setVelocityX(Vitesse * 2);
+  fusee.physics.allowGravity = false;
 }
 
 function Courir() {
