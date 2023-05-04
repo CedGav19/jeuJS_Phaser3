@@ -186,8 +186,8 @@ function update() {
     console.log("apparition de zapper sol    : " + nbal);
 
     ajoutZapper.call(this);
-    console.log("apres ajoutzap" + (nbal % 2));
-    if (int(nbal % 2) == 0) {
+    console.log("apres ajoutzap" + (parseInt(nbal, 10) % 2));
+    if (parseInt(nbal, 10) % 2 == 0) {
       console.log("dans le modulo");
       ajoutRocket.call(this); // fais apparaitre les rocket 6 fois moins souvent que les zapper
     }
@@ -252,7 +252,7 @@ function ajoutRocket() {
     "rocket"
   );
   fusee.setVelocityX(Vitesse * 2);
-  fusee.physics.allowGravity = false;
+  fusee.body.allowGravity = false;
 }
 
 function Courir() {
