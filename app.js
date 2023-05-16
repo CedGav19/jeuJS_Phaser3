@@ -1,30 +1,44 @@
 /* 
-trouver eds roquettes 
+
+COMPRENDRE PQ LE CLEAR INTERVALLE FONCTIONNE QUE UNE FOIS ( je pense car on cree tjrs plus de idintervalle quand on relance le jeu)
 
 gerer les sprites de morts ou pas  / brulure 
 
 diviser le jeu en plusieurs zone horizontale => pouvoir verifier que le jeu est pas impossible 
 
-gerer les briques et les zapper 
-
-
+gerer les briques 
 
 pour les briques , faire en sorte que barry recule a cause de la collision et si il 
 touche la fin du mur il meurt ( peut etre du feu)  
 du coup sa vitesse augmente quand il est pas a une certaine positiona la fin ca 
 
-
-
 sprite de chute lorsque gravity de barry est positive 
+
+
+calculer la vitesse maximale des objet pour que ca soit possible 
+
+
+
  */
+present = true;
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible") {
+    console.log("L'utilisateur est sur la page.");
+    present = true;
+    // Faites quelque chose lorsque l'utilisateur est sur la page
+  } else {
+    console.log("L'utilisateur n'est pas sur la page.");
+    present = false;
+  }
+});
 
 restart = document.getElementById("restart"); // selectionne le bouton restart
-var zone1; // zone de 1 a H de bas en haut
-var zone2;
-var zone3;
-var zone4;
+// zone de 1 a H de bas en haut
+var zone1 = false; //100
+var zone2 = false; // game.config.height / 4 + 100
+var zone3 = false; // game.config.height 2/ 4 + 100
+var zone4 = false; // game.config.height / 4 + 100
 
-var idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
 var estEntrainDeCourir = true;
 var monnaie;
 var Barry;
@@ -36,6 +50,14 @@ var nbal = 1500;
 var nbalPieces = 3000;
 var dernierePiece;
 hauteurrocket = 500;
+
+idAjoutbriques = 0;
+idIntervalVitesse = 0;
+idAjoutpiece = 0;
+idAjoutzap = 0;
+
+widthZapHor = 0;
+heightZapHor = 0;
 
 const config = {
   type: Phaser.AUTO,
@@ -86,7 +108,16 @@ function preload() {
 }
 
 function create() {
+  clearInterval(idIntervalVitesse);
+  clearInterval(idAjoutbriques);
+  clearInterval(idAjoutpiece);
+  clearInterval(idAjoutzap);
+  idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
+  idAjoutpiece = setInterval(ajoutPieces, 10000);
+  idAjoutzap = setInterval(ajoutZapper, 8000);
+  idAjoutbriques = setInterval(ajoutBriques, 15000);
   /*Creation sol*/
+
   this.add.image(game.config.width / 2, game.config.height / 2, "background");
 
   fusee = this.physics.add.image(
@@ -141,65 +172,50 @@ function create() {
   Barry.anims.play("barryCours");
 
   /*zapper*/
+  zap = this.physics.add.group();
   this.anims.create({
     key: "zapper",
     frames: this.anims.generateFrameNumbers("zap", { start: 0, end: 3 }), // les frames d'images à jouer
     frameRate: 5,
     repeat: -1,
   });
-  zapper = this.physics.add.sprite(
+  zapper = zap.create(
     game.config.width / 2,
-    game.config.height / 2,
+    (game.config.height * 3) / 4 + 25,
     "zap"
   );
-  tmpheightzap = zapper.height;
-  tmpwidthzap = zapper.width;
+
+  heightZapHor = zapper.width;
+  widthZapHor = zapper.height;
   zapper.setVelocityX(Vitesse);
   zapper.body.allowGravity = false;
   zapper.anims.play("zapper");
-  zapper.setBodySize(tmpheightzap, tmpwidthzap);
+  zapper.setBodySize(widthZapHor, heightZapHor);
   zapper.angle = 90;
 
   /* COLLISION ADD */
   this.physics.add.collider(ground, Barry, Courir);
   this.physics.add.collider(plateformes, Barry, Courir);
   this.physics.add.overlap(Barry, pieces, collectPieces, null, this);
-  this.physics.add.collider(Barry, zapper, perdu);
-  this.physics.add.collider(Barry, plateformes);
+  this.physics.add.collider(Barry, zap, perdu);
 
   evt = this.input.keyboard.createCursorKeys();
-
   scoreAff = this.add.text(16, 16, "score: 0", {
     fontSize: "32px",
     fill: "#000",
   });
+
+  //ZONE DE TEST
 }
 
 function update() {
   if (evt.space.isDown) {
     estEntrainDeCourir = false;
-    Barry.setVelocity(0, -250);
+    Barry.setVelocity(0, -200);
     Barry.setTexture("barryVol");
     Barry.anims.play("barryJetpack");
   }
-  if (zapper.x < -nbal) {
-    console.log("apparition de zapper sol    : " + nbal);
 
-    ajoutZapper.call(this);
-    console.log("apres ajoutzap" + (parseInt(nbal, 10) % 2));
-    if (parseInt(nbal, 10) % 2 == 0) {
-      console.log("dans le modulo");
-      ajoutRocket.call(this); // fais apparaitre les rocket 6 fois moins souvent que les zapper
-    }
-  }
-  if (briques.x < -nbalPieces) {
-    console.log("apparition de briques");
-    ajoutBriques.call(this);
-  }
-  if (monnaie.x < -nbalPieces) {
-    console.log("apparition de piece");
-    ajoutPieces.call(this);
-  }
   if (vie === 0) {
     gameOver.call(this); // fonction appele avec this permet de travailler sur notre jeu y comprsi dans la fonction ajoutée
   }
@@ -212,47 +228,84 @@ function perdu() {
 function gameOver() {
   this.scene.pause(); // physics a la place de scene si on veut qu la scene tourne toujours
   document.getElementsByClassName("menuFin")[0].style.display = "block";
-  // Barry.setTexture("fleche");   mettre autre chose que fleche evidement
-  //si on clique sur le gameover on peut recommencer
   restart.addEventListener("click", () => {
-    /* remettre les parametre par defaut , ennemyvelocity , vie , score */
     vie = 1;
     score = 0;
     Vitesse = -200;
-
-    /*enleve la fenetre game over et relance le jeu*/
     document.getElementsByClassName("menuFin")[0].style.display = "none";
     this.scene.restart(); //reinitiliser le jeu
-    this.scene.resume();
+    // this.scene.resume();
   });
 }
 
 function ajoutZapper() {
-  zapper = this.physics.add.sprite(
-    game.config.width * 1.5,
-    game.config.height - ground.height - 50,
-    "zap"
-  );
-  zapper.setVelocityX(Vitesse);
-  zapper.body.allowGravity = false;
-  zapper.anims.play("zapper");
-  tmpheightzap = zapper.height;
-  tmpwidthzap = zapper.width;
-  zapper.setBodySize(zapper.height, zapper.width);
-  zapper.angle = 90;
-  this.physics.add.collider(Barry, zapper, perdu);
-  nbal = Math.random() * 6000 + 150;
+  if (present == true) {
+    console.log("ajout zapper");
+    let tmpal = Math.random() * 10;
+    (zone1 = false), (zone2 = false), (zone3 = false), (zone4 = false);
+    i = 0;
+    while (i < (parseInt(tmpal, 10) % 5) + 1) {
+      let heightRandom = parseInt((Math.random() * 10) % 4);
+
+      switch (heightRandom) {
+        case 0:
+          if (zone2 == false || zone3 == false || zone4 == false) {
+            heightRandom = 200;
+            zone1 = true;
+          }
+          break;
+        case 1:
+          if (zone1 == false || zone3 == false || zone4 == false) {
+            heightRandom = game.config.height / 4 + 200;
+            zone2 = true;
+          }
+          break;
+        case 2:
+          if (zone2 == false || zone1 == false || zone4 == false) {
+            heightRandom = (game.config.height * 2) / 4 + 200;
+            zone3 = true;
+          }
+          break;
+        case 3:
+          if (zone2 == false || zone3 == false || zone1 == false) {
+            heightRandom = (game.config.height * 3) / 4 + 100;
+            zone4 = true;
+          }
+          break;
+      }
+
+      if (heightRandom > 10) {
+        // quand la valeur de height randoma  ete assigne a qqch => une zone est libre
+        zapper = zap.create(
+          game.config.width * 1.5 + i * 400,
+          heightRandom - ground.height,
+          "zap"
+        );
+        zapper.setVelocityX(Vitesse);
+        zapper.body.allowGravity = false;
+        if (parseInt((Math.random() * 10) % 4) == 3) {
+          // 1 fois sur 4 on met a l'horizontal
+          zapper.setBodySize(widthZapHor, heightZapHor);
+          zapper.angle = 90;
+        }
+        zapper.anims.play("zapper");
+      }
+      i++;
+    }
+  }
 }
 
 function ajoutRocket() {
-  console.log("ajout de fusee ");
-  fusee = this.physics.add.sprite(
-    game.config.width * 2, // permet de'avoir le temps de la voir venir
-    game.config.height - hauteurrocket,
-    "rocket"
-  );
-  fusee.setVelocityX(Vitesse * 2);
-  fusee.body.allowGravity = false;
+  if (present == true) {
+    console.log("ajout de fusee ");
+    fusee = this.physics.add.sprite(
+      game.config.width * 2, // permet de'avoir le temps de la voir venir
+      game.config.height - hauteurrocket,
+      "rocket"
+    );
+    fusee.setVelocityX(Vitesse * 2);
+    fusee.body.allowGravity = false;
+  }
 }
 
 function Courir() {
@@ -264,31 +317,15 @@ function Courir() {
 }
 
 function ajoutPieces() {
-  console.log("fonction piece");
-  if (nbalPieces % 5 == 0) {
-    console.log("4ligne 8 col");
-    for (let i = 0; i < 4; i++) {
-      for (let j = 0; j < 8; j++) {
-        monnaie = pieces.create(
-          game.config.width * 1.5 + j * 70,
-          60 + i * 60,
-          "piece"
-        );
-        monnaie.body.allowGravity = false;
-        monnaie.setVelocityX(Vitesse);
-        monnaie.setVelocityY(0);
-        monnaie.anims.play("piecetourne");
-      }
-    }
-  } else {
-    console.log("fleche de piece");
-
-    for (let j = 0; j < 8; j++) {
-      if (j == 6) {
-        for (let i = 0; i < 3; i++) {
+  if (present == true) {
+    console.log("fonction piece");
+    if (nbalPieces % 5 == 0) {
+      console.log("4ligne 8 col");
+      for (let i = 0; i < 4; i++) {
+        for (let j = 0; j < 8; j++) {
           monnaie = pieces.create(
             game.config.width * 1.5 + j * 70,
-            game.config.height / 2 - 60 + i * 60,
+            60 + i * 60,
             "piece"
           );
           monnaie.body.allowGravity = false;
@@ -296,42 +333,55 @@ function ajoutPieces() {
           monnaie.setVelocityY(0);
           monnaie.anims.play("piecetourne");
         }
-      } else {
-        monnaie = pieces.create(
-          game.config.width * 1.5 + j * 70,
-          game.config.height / 2,
-          "piece"
-        );
-        monnaie.body.allowGravity = false;
-        monnaie.setVelocityX(Vitesse);
-        monnaie.setVelocityY(0);
-        monnaie.anims.play("piecetourne");
+      }
+    } else {
+      console.log("fleche de piece");
+
+      for (let j = 0; j < 8; j++) {
+        if (j == 6) {
+          for (let i = 0; i < 3; i++) {
+            monnaie = pieces.create(
+              game.config.width * 1.5 + j * 70,
+              game.config.height / 2 - 60 + i * 60,
+              "piece"
+            );
+            monnaie.body.allowGravity = false;
+            monnaie.setVelocityX(Vitesse);
+            monnaie.setVelocityY(0);
+            monnaie.anims.play("piecetourne");
+          }
+        } else {
+          monnaie = pieces.create(
+            game.config.width * 1.5 + j * 70,
+            game.config.height / 2,
+            "piece"
+          );
+          monnaie.body.allowGravity = false;
+          monnaie.setVelocityX(Vitesse);
+          monnaie.setVelocityY(0);
+          monnaie.anims.play("piecetourne");
+        }
       }
     }
-  }
 
-  nbalPieces = Math.random() * 6000 + 150;
+    nbalPieces = Math.random() * 6000 + 150;
+  }
 }
 
 function ajoutBriques() {
-  briques = plateformes.create(
-    game.config.width * 1.5,
-    config.height / 2,
-    "brique"
-  );
-  briques.body.allowGravity = false;
-  briques.setBodySize(235, 115);
-  briques.setVelocityX(Vitesse);
-  briques.setImmovable(true);
-  br = plateformes.create(
-    config.width * 1.5 + 235,
-    config.height / 2,
-    "brique"
-  );
-  br.body.allowGravity = false;
-  br.setBodySize(235, 115);
-  br.setVelocityX(Vitesse);
-  br.setImmovable(true);
+  if (present == true) {
+    console.log("ajout briques");
+    for (i = 0; i < 3; i++) {
+      briques = plateformes.create(
+        game.config.width * 1.5 + i * briques.width,
+        config.height / 2,
+        "brique"
+      );
+      briques.body.allowGravity = false;
+      briques.setVelocityX(Vitesse);
+      briques.setImmovable(true);
+    }
+  }
 }
 
 function collectPieces(barry, piece) {
@@ -345,6 +395,13 @@ function collectPieces(barry, piece) {
 }
 
 function AugmenterVitesse() {
-  Vitesse -= 10;
-  console.log(Vitesse);
+  if (present == true) {
+    console.log(Vitesse);
+    if (Vitesse <= -500) {
+      clearInterval(idIntervalVitesse);
+      console.log("vitesse Maximale");
+    } else {
+      Vitesse -= 10;
+    }
+  }
 }
