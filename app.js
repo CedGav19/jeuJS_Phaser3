@@ -1,31 +1,19 @@
 /* 
-
-COMPRENDRE PQ LE CLEAR INTERVALLE FONCTIONNE QUE UNE FOIS ( je pense car on cree tjrs plus de idintervalle quand on relance le jeu)
-
 gerer les sprites de morts ou pas  / brulure 
-
-diviser le jeu en plusieurs zone horizontale => pouvoir verifier que le jeu est pas impossible 
-
-gerer les briques 
-
-pour les briques , faire en sorte que barry recule a cause de la collision et si il 
-touche la fin du mur il meurt ( peut etre du feu)  
-du coup sa vitesse augmente quand il est pas a une certaine positiona la fin ca 
 
 sprite de chute lorsque gravity de barry est positive 
 
-
 calculer la vitesse maximale des objet pour que ca soit possible 
 
+ajouter d'autre modele de pieces 
 
-
+faire en sorte que on puisse ajouter 2 rocket
  */
 present = true;
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible") {
     console.log("L'utilisateur est sur la page.");
     present = true;
-    // Faites quelque chose lorsque l'utilisateur est sur la page
   } else {
     console.log("L'utilisateur n'est pas sur la page.");
     present = false;
@@ -46,18 +34,12 @@ var score = 0;
 var evt;
 var Vitesse = -200;
 var vie = 1;
-var nbal = 1500;
-var nbalPieces = 3000;
-var dernierePiece;
-hauteurrocket = 500;
 
-idAjoutbriques = 0;
+//idAjoutbriques = 0;
 idIntervalVitesse = 0;
 idAjoutpiece = 0;
 idAjoutzap = 0;
-
-widthZapHor = 0;
-heightZapHor = 0;
+idAjoutrocket = 0;
 
 const config = {
   type: Phaser.AUTO,
@@ -103,42 +85,36 @@ function preload() {
 
   this.load.image("ground", "./assets/ground.png");
   this.load.image("background", "./assets/background.png");
-  this.load.image("brique", "./assets/brique.png");
+  // this.load.image("brique", "./assets/brique.png");
   this.load.image("rocket", "./assets/rocket.png");
 }
 
 function create() {
   clearInterval(idIntervalVitesse);
-  clearInterval(idAjoutbriques);
+  //clearInterval(idAjoutbriques);
   clearInterval(idAjoutpiece);
   clearInterval(idAjoutzap);
+  clearInterval(idAjoutrocket);
   idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
   idAjoutpiece = setInterval(ajoutPieces, 10000);
   idAjoutzap = setInterval(ajoutZapper, 8000);
-  idAjoutbriques = setInterval(ajoutBriques, 15000);
-  /*Creation sol*/
-
+  //idAjoutbriques = setInterval(ajoutBriques, 15000);
+  idAjoutrocket = setInterval(ajoutRocket, 5000);
+  /* creation du background*/
   this.add.image(game.config.width / 2, game.config.height / 2, "background");
 
-  fusee = this.physics.add.image(
-    game.config.width / 2,
-    game.config.height / 2,
-    "rocket"
-  );
-  fusee.setVelocityX(2 * Vitesse);
-  fusee.body.allowGravity = false;
+  /*Creation sol*/
   ground = this.physics.add.image(
     game.config.width / 2 + 100,
     game.config.height - 40,
     "ground"
   );
   ground.setCollideWorldBounds(true);
+  /* creation des fusee*/
+  fusee = this.physics.add.group();
   /*creation des briques*/
   plateformes = this.physics.add.group();
-  briques = plateformes.create(-300, 0, "brique");
-  briques.setVelocityX(Vitesse);
   /*creation des pieces*/
-
   pieces = this.physics.add.group();
   this.anims.create({
     key: "piecetourne",
@@ -146,9 +122,6 @@ function create() {
     frameRate: 13,
     repeat: -1,
   });
-  // pour pouvoir declancher les suivantes
-  monnaie = pieces.create(-100, 0, "piece");
-  monnaie.setVelocityX(Vitesse);
 
   /*Creation Barry*/
   this.anims.create({
@@ -170,6 +143,7 @@ function create() {
   );
   Barry.body.collideWorldBounds = true;
   Barry.anims.play("barryCours");
+  Barry.setBodySize(50, 70);
 
   /*zapper*/
   zap = this.physics.add.group();
@@ -179,25 +153,16 @@ function create() {
     frameRate: 5,
     repeat: -1,
   });
-  zapper = zap.create(
-    game.config.width / 2,
-    (game.config.height * 3) / 4 + 25,
-    "zap"
-  );
-
+  zapper = zap.create(-game.config.width, -game.config.height, "zap");
   heightZapHor = zapper.width;
   widthZapHor = zapper.height;
-  zapper.setVelocityX(Vitesse);
-  zapper.body.allowGravity = false;
-  zapper.anims.play("zapper");
-  zapper.setBodySize(widthZapHor, heightZapHor);
-  zapper.angle = 90;
 
   /* COLLISION ADD */
   this.physics.add.collider(ground, Barry, Courir);
   this.physics.add.collider(plateformes, Barry, Courir);
   this.physics.add.overlap(Barry, pieces, collectPieces, null, this);
   this.physics.add.collider(Barry, zap, perdu);
+  this.physics.add.collider(Barry, fusee, perdu);
 
   evt = this.input.keyboard.createCursorKeys();
   scoreAff = this.add.text(16, 16, "score: 0", {
@@ -232,6 +197,7 @@ function gameOver() {
     vie = 1;
     score = 0;
     Vitesse = -200;
+    game.config.physics.arcade.gravity.y = 350;
     document.getElementsByClassName("menuFin")[0].style.display = "none";
     this.scene.restart(); //reinitiliser le jeu
     // this.scene.resume();
@@ -268,12 +234,11 @@ function ajoutZapper() {
           break;
         case 3:
           if (zone2 == false || zone3 == false || zone1 == false) {
-            heightRandom = (game.config.height * 3) / 4 + 100;
+            heightRandom = (game.config.height * 3) / 4 + 125;
             zone4 = true;
           }
           break;
       }
-
       if (heightRandom > 10) {
         // quand la valeur de height randoma  ete assigne a qqch => une zone est libre
         zapper = zap.create(
@@ -283,9 +248,10 @@ function ajoutZapper() {
         );
         zapper.setVelocityX(Vitesse);
         zapper.body.allowGravity = false;
+        zapper.setBodySize(65, 215);
         if (parseInt((Math.random() * 10) % 4) == 3) {
           // 1 fois sur 4 on met a l'horizontal
-          zapper.setBodySize(widthZapHor, heightZapHor);
+          zapper.setBodySize(215, 65);
           zapper.angle = 90;
         }
         zapper.anims.play("zapper");
@@ -298,18 +264,14 @@ function ajoutZapper() {
 function ajoutRocket() {
   if (present == true) {
     console.log("ajout de fusee ");
-    fusee = this.physics.add.sprite(
-      game.config.width * 2, // permet de'avoir le temps de la voir venir
-      game.config.height - hauteurrocket,
-      "rocket"
-    );
-    fusee.setVelocityX(Vitesse * 2);
-    fusee.body.allowGravity = false;
+    rocket = fusee.create(game.config.width * 1.5, Barry.y, "rocket");
+    rocket.setVelocityX(Vitesse * 2);
+    rocket.setBodySize(50, 25);
+    rocket.body.allowGravity = false;
   }
 }
 
 function Courir() {
-  //Barry.setTexture("barrySol");
   if (estEntrainDeCourir == false) {
     Barry.anims.play("barryCours");
     estEntrainDeCourir = true;
@@ -319,9 +281,9 @@ function Courir() {
 function ajoutPieces() {
   if (present == true) {
     console.log("fonction piece");
-    if (nbalPieces % 5 == 0) {
-      console.log("4ligne 8 col");
-      for (let i = 0; i < 4; i++) {
+    if (parseInt(Math.random() * 10, 10) % 5 == 0) {
+      console.log("3ligne 8 col");
+      for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 8; j++) {
           monnaie = pieces.create(
             game.config.width * 1.5 + j * 70,
@@ -330,35 +292,67 @@ function ajoutPieces() {
           );
           monnaie.body.allowGravity = false;
           monnaie.setVelocityX(Vitesse);
-          monnaie.setVelocityY(0);
           monnaie.anims.play("piecetourne");
         }
       }
     } else {
       console.log("fleche de piece");
-
-      for (let j = 0; j < 8; j++) {
-        if (j == 6) {
+      let flecheok = false;
+      let tmpswitch = parseInt(Math.random() * 10, 10) % 4;
+      let hauteurFleche = 0;
+      while (flecheok == false) {
+        switch (tmpswitch) {
+          case 0:
+            if (zone1 == true) tmpswitch += 1;
+            else {
+              flecheok = true;
+              hauteurFleche = 100;
+            }
+            break;
+          case 1:
+            if (zone2 == true) tmpswitch += 1;
+            else {
+              flecheok = true;
+              hauteurFleche = 400;
+            }
+            break;
+          case 2:
+            if (zone3 == true) tmpswitch += 1;
+            else {
+              flecheok = true;
+              hauteurFleche = 600;
+            }
+            break;
+          case 3:
+            if (zone4 == true) tmpswitch = 0;
+            else {
+              flecheok = true;
+              hauteurFleche = game.config.height - 175;
+            }
+            break;
+        }
+        console.log(tmpswitch);
+      }
+      for (let j = 0; j < 7; j++) {
+        if (j == 5) {
           for (let i = 0; i < 3; i++) {
             monnaie = pieces.create(
-              game.config.width * 1.5 + j * 70,
-              game.config.height / 2 - 60 + i * 60,
+              game.config.width * 1.25 + j * 70,
+              hauteurFleche - 60 + i * 60,
               "piece"
             );
             monnaie.body.allowGravity = false;
             monnaie.setVelocityX(Vitesse);
-            monnaie.setVelocityY(0);
             monnaie.anims.play("piecetourne");
           }
         } else {
           monnaie = pieces.create(
-            game.config.width * 1.5 + j * 70,
-            game.config.height / 2,
+            game.config.width * 1.25 + j * 70,
+            hauteurFleche,
             "piece"
           );
           monnaie.body.allowGravity = false;
           monnaie.setVelocityX(Vitesse);
-          monnaie.setVelocityY(0);
           monnaie.anims.play("piecetourne");
         }
       }
@@ -368,27 +362,24 @@ function ajoutPieces() {
   }
 }
 
-function ajoutBriques() {
+/*function ajoutBriques() {
   if (present == true) {
     console.log("ajout briques");
     for (i = 0; i < 3; i++) {
       briques = plateformes.create(
-        game.config.width * 1.5 + i * briques.width,
+        game.config.width * 1.5 + i * 205,
         config.height / 2,
         "brique"
       );
       briques.body.allowGravity = false;
       briques.setVelocityX(Vitesse);
       briques.setImmovable(true);
+      console.log(briques.width + " ," + briques.height);
     }
   }
-}
+}*/
 
 function collectPieces(barry, piece) {
-  if (piece === monnaie) {
-    monnaie = pieces.create(-5, game.config.height, "piece");
-    monnaie.setVelocityX(Vitesse);
-  }
   piece.disableBody(true, true);
   score += 5;
   scoreAff.setText("Score: " + score);
@@ -397,11 +388,13 @@ function collectPieces(barry, piece) {
 function AugmenterVitesse() {
   if (present == true) {
     console.log(Vitesse);
+    console.log(game.config.physics.arcade.gravity.y);
     if (Vitesse <= -500) {
       clearInterval(idIntervalVitesse);
       console.log("vitesse Maximale");
     } else {
       Vitesse -= 10;
+      game.config.physics.arcade.gravity.y += 5;
     }
   }
 }
