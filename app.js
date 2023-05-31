@@ -12,16 +12,9 @@ document.addEventListener("visibilitychange", function () {
     present = false;
   }
 });
-
+var usernamePlayer;
 window.addEventListener("message", function (event) {
-  // Vérifiez l'origine du message si nécessaire
-  // if (event.origin !== 'http://www.example.com') return;
-
-  // Récupérez les données du message
-  var messageData = event.data;
-
-  // Faites quelque chose avec les données
-  console.log("Données reçues : ", messageData);
+  if (event.data) usernamePlayer = event.data.username;
 });
 
 var zone1 = false; //100
@@ -44,6 +37,8 @@ afficherScore = document.getElementById("score");
 restart = document.getElementById("restart");
 commencer = document.getElementById("start");
 afficherPB = document.getElementById("PB");
+afficherHello = document.getElementById("hello");
+afficherHello.innerHTML = "Welcome " + usernamePlayer;
 setTimeout(() => {
   afficherPB.innerHTML = "HighScore : " + highscore;
 }, 1001);
@@ -456,7 +451,7 @@ function AugmenterVitesse() {
 
 // FONCTION LIEN BDD
 function getPB() {
-  if (true) {
+  if (usernamePlayer != null) {
     fetch(
       "https://europe-west1.gcp.data.mongodb-api.com/app/application-0-ptcis/endpoint/getPB",
       {
@@ -466,7 +461,7 @@ function getPB() {
         },
         body: JSON.stringify({
           name: "Jetpack Joyride",
-          username: "Ced",
+          username: usernamePlayer,
         }),
       }
     )
@@ -487,7 +482,7 @@ function getPB() {
 }
 
 function updateScore() {
-  if (true) {
+  if (usernamePlayer != null) {
     fetch(
       "https://europe-west1.gcp.data.mongodb-api.com/app/application-0-ptcis/endpoint/updateScore",
       {
@@ -497,7 +492,7 @@ function updateScore() {
         },
         body: JSON.stringify({
           name: "Jetpack Joyride",
-          username: "Ced",
+          username: usernamePlayer,
           score: score, // premier score = propriete de l'objeta  envoye , 2 eme = score du jeu
         }),
       }
