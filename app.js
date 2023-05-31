@@ -27,7 +27,7 @@ var monnaie;
 var Barry;
 var score = 0;
 var highscore = 0;
-getPB(); // fonction lien avec bdd
+getPB(); // fonction lien avec bdd et initialise highscore si l'utilisateur est connecte
 var evt;
 var Vitesse = -200;
 var VitesseBarryVol = -200;
@@ -38,9 +38,10 @@ restart = document.getElementById("restart");
 commencer = document.getElementById("start");
 afficherPB = document.getElementById("PB");
 afficherHello = document.getElementById("hello");
-afficherHello.innerHTML = "Welcome " + usernamePlayer;
 setTimeout(() => {
   afficherPB.innerHTML = "HighScore : " + highscore;
+  if (usernamePlayer != null)
+    afficherHello.innerHTML = "Welcome " + usernamePlayer;
 }, 1001);
 
 //idAjoutbriques = 0;
