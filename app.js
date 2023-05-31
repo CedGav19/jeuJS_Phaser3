@@ -1,5 +1,4 @@
 //verif si l'utilisateur ets sur la fenetre
-console.log("TESTESTETETETETETETETETETETETETE");
 present = true;
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible") {
@@ -250,7 +249,7 @@ function ajoutNuage() {
 
 function ajoutZapper() {
   if (present == true) {
-    console.log("ajout zapper");
+    //console.log("ajout zapper");
     let tmpal = Math.random() * 10;
     (zone1 = false), (zone2 = false), (zone3 = false), (zone4 = false);
     i = 0;
@@ -319,7 +318,7 @@ function ajoutZapper() {
 
 function ajoutRocket() {
   if (present == true && score > 100) {
-    console.log("ajout de fusee ");
+    //console.log("ajout de fusee ");
     rocket = fusee.create(game.config.width * 1.5, Barry.y, "rocket");
     rocket.setVelocityX(Vitesse * 2);
     rocket.setBodySize(45, 25);
@@ -375,11 +374,11 @@ function ajoutPieces() {
 
   // appartition
   if (present == true) {
-    console.log("fonction piece");
+    // console.log("fonction piece");
     pieceal = parseInt(Math.random() * 10, 10) % 5;
     switch (pieceal) {
       case 0:
-        console.log("3ligne 8 col");
+        // console.log("3ligne 8 col");
         for (let i = 0; i < 3; i++) {
           for (let j = 0; j < 8; j++) {
             monnaie = pieces.create(
@@ -395,7 +394,7 @@ function ajoutPieces() {
         break;
 
       case 1:
-        console.log("fleche de piece");
+        //console.log("fleche de piece");
         for (let j = 0; j < 7; j++) {
           if (j == 5) {
             for (let i = 0; i < 3; i++) {
@@ -422,7 +421,7 @@ function ajoutPieces() {
         break;
 
       case 2:
-        console.log("descente");
+        //    console.log("descente");
 
         for (let j = 0; j < 9; j++) {
           monnaie = pieces.create(
@@ -437,7 +436,7 @@ function ajoutPieces() {
 
         break;
       case 3:
-        console.log("montee");
+        //    console.log("montee");
         for (let j = 0; j < 9; j++) {
           monnaie = pieces.create(
             game.config.width * 1.25 + j * 70,
@@ -464,11 +463,11 @@ function collectPieces(barry, piece) {
 
 function AugmenterVitesse() {
   if (present == true) {
-    console.log(Vitesse);
-    console.log(game.config.physics.arcade.gravity.y);
+    //  console.log(Vitesse);
+    //  console.log(game.config.physics.arcade.gravity.y);
     if (Vitesse <= -500) {
       clearInterval(idIntervalVitesse);
-      console.log("vitesse Maximale");
+      //  console.log("vitesse Maximale");
     } else {
       Vitesse -= 10;
       game.config.physics.arcade.gravity.y += 7;
@@ -497,17 +496,16 @@ function getPB() {
         if (response.ok) return response.json();
       })
       .then((data) => {
-        console.log("dans data de getpb");
-        console.log(data);
-        console.log(highscore + "avant");
+        // console.log(data);
+        // console.log(highscore + "avant");
         highscore = data.score;
-        console.log(highscore + "apres");
+        //  console.log(highscore + "apres");
       })
       .catch((err) => {
-        console.log("Error while get pb request : ", err);
+        //  console.log("Error while get pb request : ", err);
       });
   } else {
-    console.log("pas d'utilisateur connecte");
+    //  console.log("pas d'utilisateur connecte");
   }
 }
 
@@ -530,18 +528,18 @@ function updateScore() {
     )
       .then((response) => {
         if (response.ok) return response.json();
-        else console.log("erreur dans response de update");
+        // else console.log("erreur dans response de update");
       })
       .then((data) => {
-        if (data.update == true) console.log("update reussis");
-        else {
-          console.log("error on update");
-        }
+        //if (data.update == true) console.log("update reussis");
+        //else {
+        //  console.log("error on update");
+        // }
       })
       .catch((err) => {
         console.log("Error while get update score : ", err);
       });
   } else {
-    console.log("pas d'utilisateur connecte");
+    // console.log("pas d'utilisateur connecte");
   }
 }
