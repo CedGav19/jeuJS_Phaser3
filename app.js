@@ -511,6 +511,7 @@ function getPB() {
 }
 
 function updateScore() {
+  console.log("dans updatescore");
   if (usernamePlayer != null) {
     fetch(
       "https://europe-west1.gcp.data.mongodb-api.com/app/application-0-ptcis/endpoint/updateScore",
