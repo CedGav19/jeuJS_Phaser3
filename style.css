@@ -25,6 +25,21 @@ canvas {
   left: 50%;
   transform: translate(-50%, 50%);
 }
+
+.menuDepart {
+  display: block;
+  margin: 100px auto;
+  padding: 20px;
+  width: 300px;
+  height: auto;
+
+  background-color: darkgoldenrod;
+  border-radius: 10px;
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, 50%);
+}
+
 #GameOver {
   color: red;
   font-weight: bold;

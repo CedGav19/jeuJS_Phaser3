@@ -1,10 +1,6 @@
 /* 
+changer lme mode d'ppel de game over , 
 
-sprite de chute lorsque gravity de barry est positive 
-
-calculer la vitesse maximale des objet pour que ca soit possible 
-
-faire en sorte que on puisse ajouter 2 rocket
  */
 present = true;
 document.addEventListener("visibilitychange", function () {
@@ -17,7 +13,17 @@ document.addEventListener("visibilitychange", function () {
   }
 });
 
-restart = document.getElementById("restart"); // selectionne le bouton restart
+window.addEventListener("message", function (event) {
+  // Vérifiez l'origine du message si nécessaire
+  // if (event.origin !== 'http://www.example.com') return;
+
+  // Récupérez les données du message
+  var messageData = event.data;
+
+  // Faites quelque chose avec les données
+  console.log("Données reçues : ", messageData);
+});
+
 var zone1 = false; //100
 var zone2 = false; // game.config.height / 4 + 100
 var zone3 = false; // game.config.height 2/ 4 + 100
@@ -27,10 +33,20 @@ var estEntrainDeCourir = true;
 var monnaie;
 var Barry;
 var score = 0;
+var highscore = 0;
+getPB(); // fonction lien avec bdd
 var evt;
 var Vitesse = -200;
 var VitesseBarryVol = -200;
 var vie = 1;
+afficherHighScore = document.getElementById("highScore");
+afficherScore = document.getElementById("score");
+restart = document.getElementById("restart");
+commencer = document.getElementById("start");
+afficherPB = document.getElementById("PB");
+setTimeout(() => {
+  afficherPB.innerHTML = "HighScore : " + highscore;
+}, 1001);
 
 //idAjoutbriques = 0;
 idIntervalVitesse = 0;
@@ -86,14 +102,6 @@ function preload() {
 }
 
 function create() {
-  clearInterval(idIntervalVitesse);
-  clearInterval(idAjoutpiece);
-  clearInterval(idAjoutzap);
-  clearInterval(idAjoutrocket);
-  idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
-  idAjoutpiece = setInterval(ajoutPieces, 9000);
-  idAjoutzap = setInterval(ajoutZapper, 7000);
-  idAjoutrocket = setInterval(ajoutRocket, 5000);
   /* creation du background*/
   this.add.image(game.config.width / 2, game.config.height / 2, "background");
 
@@ -137,7 +145,7 @@ function create() {
   );
   Barry.body.collideWorldBounds = true;
   Barry.anims.play("barryCours");
-  Barry.setBodySize(50, 70);
+  Barry.setBodySize(45, 65);
 
   /*zapper*/
   zap = this.physics.add.group();
@@ -147,9 +155,7 @@ function create() {
     frameRate: 5,
     repeat: -1,
   });
-  zapper = zap.create(-game.config.width, -game.config.height, "zap");
-  heightZapHor = zapper.width;
-  widthZapHor = zapper.height;
+  //zapper = zap.create(-game.config.width, -game.config.height, "zap");
 
   /* COLLISION ADD */
   this.physics.add.collider(ground, Barry, Courir);
@@ -164,7 +170,20 @@ function create() {
     fill: "#000",
   });
 
-  //ZONE DE TEST
+  this.scene.pause(); // on attend le lancement avec le bouton start
+  commencer.addEventListener("click", () => {
+    document.getElementsByClassName("menuDepart")[0].style.display = "none";
+    this.scene.resume(); //relance le jeu
+
+    clearInterval(idIntervalVitesse);
+    clearInterval(idAjoutpiece);
+    clearInterval(idAjoutzap);
+    clearInterval(idAjoutrocket);
+    idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
+    idAjoutpiece = setInterval(ajoutPieces, 9000);
+    idAjoutzap = setInterval(ajoutZapper, 7000);
+    idAjoutrocket = setInterval(ajoutRocket, 4000);
+  });
 }
 
 function update() {
@@ -186,16 +205,23 @@ function perdu() {
 
 function gameOver() {
   this.scene.pause(); // physics a la place de scene si on veut qu la scene tourne toujours
+  if (score > highscore) {
+    highscore = score;
+    updateScore();
+  }
+
+  afficherScore.innerHTML = "Score : " + score;
+  afficherHighScore.innerHTML = "HighScore : " + highscore;
   document.getElementsByClassName("menuFin")[0].style.display = "block";
   restart.addEventListener("click", () => {
+    //reset des donnée de départ
     vie = 1;
     score = 0;
     Vitesse = -200;
     VitesseBarryVol = -200;
     game.config.physics.arcade.gravity.y = 350;
     document.getElementsByClassName("menuFin")[0].style.display = "none";
-    this.scene.restart(); //reinitiliser le jeu
-    // this.scene.resume();
+    this.scene.restart(); //relance le jeu
   });
 }
 
@@ -255,10 +281,10 @@ function ajoutZapper() {
         );
         zapper.setVelocityX(Vitesse);
         zapper.body.allowGravity = false;
-        zapper.setBodySize(65, 215);
+        zapper.setBodySize(60, 215);
         if (parseInt((Math.random() * 10) % 4) == 3) {
           // 1 fois sur 4 on met a l'horizontal
-          zapper.setBodySize(215, 65);
+          zapper.setBodySize(215, 60);
           zapper.angle = 90;
         }
         zapper.anims.play("zapper");
@@ -269,11 +295,11 @@ function ajoutZapper() {
 }
 
 function ajoutRocket() {
-  if (present == true) {
+  if (present == true && score > 100) {
     console.log("ajout de fusee ");
     rocket = fusee.create(game.config.width * 1.5, Barry.y, "rocket");
     rocket.setVelocityX(Vitesse * 2);
-    rocket.setBodySize(50, 25);
+    rocket.setBodySize(45, 25);
     rocket.body.allowGravity = false;
   }
 }
@@ -425,5 +451,69 @@ function AugmenterVitesse() {
       game.config.physics.arcade.gravity.y += 7;
       VitesseBarryVol -= 2;
     }
+  }
+}
+
+// FONCTION LIEN BDD
+function getPB() {
+  if (true) {
+    fetch(
+      "https://europe-west1.gcp.data.mongodb-api.com/app/application-0-ptcis/endpoint/getPB",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Jetpack Joyride",
+          username: "Ced",
+        }),
+      }
+    )
+      .then((response) => {
+        if (response.ok) return response.json();
+      })
+      .then((data) => {
+        console.log("dans data de getpb");
+        console.log(data);
+        console.log(highscore + "avant");
+        highscore = data.score;
+        console.log(highscore + "apres");
+      })
+      .catch((err) => {
+        console.log("Error while get pb request : ", err);
+      });
+  }
+}
+
+function updateScore() {
+  if (true) {
+    fetch(
+      "https://europe-west1.gcp.data.mongodb-api.com/app/application-0-ptcis/endpoint/updateScore",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: "Jetpack Joyride",
+          username: "Ced",
+          score: score, // premier score = propriete de l'objeta  envoye , 2 eme = score du jeu
+        }),
+      }
+    )
+      .then((response) => {
+        if (response.ok) return response.json();
+        else console.log("erreur dans response de update");
+      })
+      .then((data) => {
+        if (data.update == true) console.log("update reussis");
+        else {
+          console.log("error on update");
+        }
+      })
+      .catch((err) => {
+        console.log("Error while get update score : ", err);
+      });
   }
 }
