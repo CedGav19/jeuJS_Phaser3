@@ -496,7 +496,7 @@ function getPB() {
         if (response.ok) return response.json();
       })
       .then((data) => {
-        console.log(data);
+        //console.log(data);
         highscore = data.score;
       })
       .catch((err) => {
@@ -538,6 +538,6 @@ function updateScore() {
         console.log("Error while get update score : ", err);
       });
   } else {
-    // console.log("pas d'utilisateur connecte");
+    console.log("pas d'utilisateur connecte");
   }
 }
