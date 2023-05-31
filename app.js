@@ -1,4 +1,5 @@
 //verif si l'utilisateur ets sur la fenetre
+console.log("TESTESTETETETETETETETETETETETETE");
 present = true;
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible") {
