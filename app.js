@@ -185,6 +185,8 @@ function create() {
     });
     premierLancement = false;
   }
+  Vitesse = -220;
+  VitesseBarryVol = -220;
   clearInterval(idIntervalVitesse);
   clearInterval(idAjoutpiece);
   clearInterval(idAjoutzap);
