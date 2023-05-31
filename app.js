@@ -487,7 +487,7 @@ function getPB() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: "Tetris",
+          name: "Jetpack Joyride",
           username: usernamePlayer,
         }),
       }
