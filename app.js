@@ -10,7 +10,7 @@ document.addEventListener("visibilitychange", function () {
   }
 });
 // selectionne le nom a partir du site
-var usernamePlayer;
+var usernamePlayer = null;
 window.addEventListener("message", function (event) {
   if (event.data) usernamePlayer = event.data.username;
 });
