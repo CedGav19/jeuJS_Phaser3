@@ -496,11 +496,14 @@ function getPB() {
         if (response.ok) return response.json();
       })
       .then((data) => {
+        console.log(data);
         highscore = data.score;
       })
       .catch((err) => {
         console.log("Error while get pb request : ", err);
       });
+  } else {
+    console.log("dans pb , utilisateur non connecte");
   }
 }
 
