@@ -48,6 +48,7 @@ idIntervalVitesse = 0;
 idAjoutpiece = 0;
 idAjoutzap = 0;
 idAjoutrocket = 0;
+idAjoutNuage = 0;
 
 const config = {
   type: Phaser.AUTO,
@@ -94,12 +95,17 @@ function preload() {
   this.load.image("ground", "./assets/ground.png");
   this.load.image("background", "./assets/background.png");
   this.load.image("rocket", "./assets/rocket.png");
+  this.load.image("nuage", "./assets/nuage.png");
 }
 
 function create() {
   /* creation du background*/
-  this.add.image(game.config.width / 2, game.config.height / 2, "background");
-
+  bckgrnd = this.add.image(
+    game.config.width / 2,
+    game.config.height / 2,
+    "background"
+  );
+  bckgrnd.setDepth(-1);
   /*Creation sol*/
   ground = this.physics.add.image(
     game.config.width / 2 + 100,
@@ -107,6 +113,14 @@ function create() {
     "ground"
   );
   ground.setCollideWorldBounds(true);
+  /*creation des nuages */
+  clouds = this.physics.add.group();
+  cloud = clouds.create(400, 100, "nuage");
+  cloud.setVelocityX(Vitesse / 3);
+  cloud.body.allowGravity = false;
+  cloud = clouds.create(800, 150, "nuage");
+  cloud.setVelocityX(Vitesse / 3);
+  cloud.body.allowGravity = false;
   /* creation des fusee*/
   fusee = this.physics.add.group();
   /*creation des briques*/
@@ -140,7 +154,7 @@ function create() {
   );
   Barry.body.collideWorldBounds = true;
   Barry.anims.play("barryCours");
-  Barry.setBodySize(45, 65);
+  Barry.setBodySize(45, 70);
 
   /*zapper*/
   zap = this.physics.add.group();
@@ -168,7 +182,7 @@ function create() {
     this.scene.pause(); // on attend le lancement avec le bouton start
     commencer.addEventListener("click", () => {
       document.getElementsByClassName("menuDepart")[0].style.display = "none";
-      this.scene.resume(); //relance le jeu
+      this.scene.restart(); //relance le jeu
     });
     premierLancement = false;
   }
@@ -176,10 +190,12 @@ function create() {
   clearInterval(idAjoutpiece);
   clearInterval(idAjoutzap);
   clearInterval(idAjoutrocket);
+  clearInterval(idAjoutNuage);
   idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
-  idAjoutpiece = setInterval(ajoutPieces, 9000);
-  idAjoutzap = setInterval(ajoutZapper, 7000);
+  idAjoutpiece = setInterval(ajoutPieces, 7900);
+  idAjoutzap = setInterval(ajoutZapper, 7750);
   idAjoutrocket = setInterval(ajoutRocket, 4000);
+  idAjoutNuage = setInterval(ajoutNuage, 6000);
 }
 
 function update() {
@@ -219,6 +235,17 @@ function gameOver() {
     document.getElementsByClassName("menuFin")[0].style.display = "none";
     this.scene.restart(); //relance le jeu
   });
+}
+function ajoutNuage() {
+  if (present) {
+    let tmpalnuage = Math.random() * 10;
+    if (parseInt(tmpalnuage, 10) % 2 == 0)
+      cloud = clouds.create(game.config.width + 100, 100, "nuage");
+    else cloud = clouds.create(game.config.width + 100, 150, "nuage");
+    cloud.body.allowGravity = false;
+    cloud.setVelocityX(Vitesse / 3);
+    cloud.setDepth(-1);
+  }
 }
 
 function ajoutZapper() {
