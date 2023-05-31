@@ -191,8 +191,8 @@ function create() {
   clearInterval(idAjoutrocket);
   clearInterval(idAjoutNuage);
   idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
-  idAjoutpiece = setInterval(ajoutPieces, 7900);
-  idAjoutzap = setInterval(ajoutZapper, 7750);
+  idAjoutpiece = setInterval(ajoutPieces, 6300);
+  idAjoutzap = setInterval(ajoutZapper, 6100);
   idAjoutrocket = setInterval(ajoutRocket, 4000);
   idAjoutNuage = setInterval(ajoutNuage, 6000);
 }
@@ -253,7 +253,7 @@ function ajoutZapper() {
     let tmpal = Math.random() * 10;
     (zone1 = false), (zone2 = false), (zone3 = false), (zone4 = false);
     i = 0;
-    while (i < (parseInt(tmpal, 10) % 6) + 2) {
+    while (i < (parseInt(tmpal, 10) % 4) + 2) {
       let heightRandom = parseInt((Math.random() * 10) % 4);
 
       switch (heightRandom) {
