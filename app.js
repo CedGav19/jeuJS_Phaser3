@@ -1,7 +1,4 @@
-/* 
-changer lme mode d'ppel de game over , 
-
- */
+//verif si l'utilisateur ets sur la fenetre
 present = true;
 document.addEventListener("visibilitychange", function () {
   if (document.visibilityState === "visible") {
@@ -12,11 +9,13 @@ document.addEventListener("visibilitychange", function () {
     present = false;
   }
 });
+// selectionne le nom a partir du site
 var usernamePlayer;
 window.addEventListener("message", function (event) {
   if (event.data) usernamePlayer = event.data.username;
 });
 
+premierLancement = true;
 var zone1 = false; //100
 var zone2 = false; // game.config.height / 4 + 100
 var zone3 = false; // game.config.height 2/ 4 + 100
@@ -59,7 +58,7 @@ const config = {
     default: "arcade",
     arcade: {
       gravity: { y: 350 },
-      debug: true,
+      debug: false,
     },
   },
   scene: {
@@ -165,21 +164,22 @@ function create() {
     fontSize: "32px",
     fill: "#000",
   });
-
-  this.scene.pause(); // on attend le lancement avec le bouton start
-  commencer.addEventListener("click", () => {
-    document.getElementsByClassName("menuDepart")[0].style.display = "none";
-    this.scene.resume(); //relance le jeu
-
-    clearInterval(idIntervalVitesse);
-    clearInterval(idAjoutpiece);
-    clearInterval(idAjoutzap);
-    clearInterval(idAjoutrocket);
-    idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
-    idAjoutpiece = setInterval(ajoutPieces, 9000);
-    idAjoutzap = setInterval(ajoutZapper, 7000);
-    idAjoutrocket = setInterval(ajoutRocket, 4000);
-  });
+  if (premierLancement) {
+    this.scene.pause(); // on attend le lancement avec le bouton start
+    commencer.addEventListener("click", () => {
+      document.getElementsByClassName("menuDepart")[0].style.display = "none";
+      this.scene.resume(); //relance le jeu
+    });
+    premierLancement = false;
+  }
+  clearInterval(idIntervalVitesse);
+  clearInterval(idAjoutpiece);
+  clearInterval(idAjoutzap);
+  clearInterval(idAjoutrocket);
+  idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
+  idAjoutpiece = setInterval(ajoutPieces, 9000);
+  idAjoutzap = setInterval(ajoutZapper, 7000);
+  idAjoutrocket = setInterval(ajoutRocket, 4000);
 }
 
 function update() {
@@ -479,6 +479,8 @@ function getPB() {
       .catch((err) => {
         console.log("Error while get pb request : ", err);
       });
+  } else {
+    console.log("pas d'utilisateur connecte");
   }
 }
 
@@ -511,5 +513,7 @@ function updateScore() {
       .catch((err) => {
         console.log("Error while get update score : ", err);
       });
+  } else {
+    console.log("pas d'utilisateur connecte");
   }
 }
