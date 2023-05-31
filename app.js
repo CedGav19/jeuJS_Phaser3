@@ -28,8 +28,8 @@ var score = 0;
 var highscore = 0;
 getPB(); // fonction lien avec bdd et initialise highscore si l'utilisateur est connecte
 var evt;
-var Vitesse = -200;
-var VitesseBarryVol = -200;
+var Vitesse = -220;
+var VitesseBarryVol = -220;
 var vie = 1;
 afficherHighScore = document.getElementById("highScore");
 afficherScore = document.getElementById("score");
@@ -43,7 +43,6 @@ setTimeout(() => {
     afficherHello.innerHTML = "Welcome " + usernamePlayer;
 }, 1001);
 
-//idAjoutbriques = 0;
 idIntervalVitesse = 0;
 idAjoutpiece = 0;
 idAjoutzap = 0;
@@ -58,7 +57,7 @@ const config = {
   physics: {
     default: "arcade",
     arcade: {
-      gravity: { y: 350 },
+      gravity: { y: 370 },
       debug: false,
     },
   },
@@ -174,7 +173,7 @@ function create() {
   this.physics.add.collider(Barry, fusee, perdu);
 
   evt = this.input.keyboard.createCursorKeys();
-  scoreAff = this.add.text(16, 16, "score: 0", {
+  scoreAff = this.add.text(16, 16, "Score: 0", {
     fontSize: "32px",
     fill: "#000",
   });
@@ -229,9 +228,9 @@ function gameOver() {
     //reset des donnée de départ
     vie = 1;
     score = 0;
-    Vitesse = -200;
-    VitesseBarryVol = -200;
-    game.config.physics.arcade.gravity.y = 350;
+    Vitesse = -220;
+    VitesseBarryVol = -220;
+    game.config.physics.arcade.gravity.y = 370;
     document.getElementsByClassName("menuFin")[0].style.display = "none";
     this.scene.restart(); //relance le jeu
   });
@@ -254,7 +253,7 @@ function ajoutZapper() {
     let tmpal = Math.random() * 10;
     (zone1 = false), (zone2 = false), (zone3 = false), (zone4 = false);
     i = 0;
-    while (i < (parseInt(tmpal, 10) % 5) + 1) {
+    while (i < (parseInt(tmpal, 10) % 6) + 2) {
       let heightRandom = parseInt((Math.random() * 10) % 4);
 
       switch (heightRandom) {
@@ -472,7 +471,7 @@ function AugmenterVitesse() {
     } else {
       Vitesse -= 10;
       game.config.physics.arcade.gravity.y += 7;
-      VitesseBarryVol -= 2;
+      VitesseBarryVol -= 3;
     }
   }
 }
