@@ -478,7 +478,6 @@ function AugmenterVitesse() {
 
 // FONCTION LIEN BDD
 function getPB() {
-  console.log("dans pb");
   if (usernamePlayer != null) {
     fetch(
       "https://europe-west1.gcp.data.mongodb-api.com/app/application-0-ptcis/endpoint/getPB",
@@ -488,26 +487,20 @@ function getPB() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          name: "Jetpack Joyride",
+          name: "Tetris",
           username: usernamePlayer,
         }),
       }
     )
       .then((response) => {
-        console.log("dans pb response");
         if (response.ok) return response.json();
       })
       .then((data) => {
-        console.log(data);
-        console.log(highscore + "avant");
         highscore = data.score;
-        console.log(highscore + "apres");
       })
       .catch((err) => {
-        //  console.log("Error while get pb request : ", err);
+        console.log("Error while get pb request : ", err);
       });
-  } else {
-    console.log("pas d'utilisateur connecte");
   }
 }
 
