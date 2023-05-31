@@ -193,7 +193,7 @@ function create() {
   idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
   idAjoutpiece = setInterval(ajoutPieces, 6300);
   idAjoutzap = setInterval(ajoutZapper, 6100);
-  idAjoutrocket = setInterval(ajoutRocket, 4000);
+  idAjoutrocket = setInterval(ajoutRocket, 4500);
   idAjoutNuage = setInterval(ajoutNuage, 6000);
 }
 
