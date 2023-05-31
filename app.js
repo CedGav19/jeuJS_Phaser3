@@ -41,7 +41,7 @@ setTimeout(() => {
   afficherPB.innerHTML = "HighScore : " + highscore;
   if (usernamePlayer != null)
     afficherHello.innerHTML = "Welcome " + usernamePlayer;
-}, 1500);
+}, 2500);
 
 idIntervalVitesse = 0;
 idAjoutpiece = 0;
@@ -497,9 +497,9 @@ function getPB() {
       })
       .then((data) => {
         // console.log(data);
-        // console.log(highscore + "avant");
+        console.log(highscore + "avant");
         highscore = data.score;
-        //  console.log(highscore + "apres");
+        console.log(highscore + "apres");
       })
       .catch((err) => {
         //  console.log("Error while get pb request : ", err);
