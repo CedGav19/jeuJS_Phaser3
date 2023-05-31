@@ -41,7 +41,7 @@ setTimeout(() => {
   afficherPB.innerHTML = "HighScore : " + highscore;
   if (usernamePlayer != null)
     afficherHello.innerHTML = "Welcome " + usernamePlayer;
-}, 1001);
+}, 1500);
 
 idIntervalVitesse = 0;
 idAjoutpiece = 0;
