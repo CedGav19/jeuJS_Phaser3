@@ -26,7 +26,7 @@ var monnaie;
 var Barry;
 var score = 0;
 var highscore = 0;
-getPB(); // fonction lien avec bdd et initialise highscore si l'utilisateur est connecte
+setTimeout(getPB, 1000); // fonction lien avec bdd et initialise highscore si l'utilisateur est connecte
 var evt;
 var Vitesse = -220;
 var VitesseBarryVol = -220;
@@ -41,7 +41,7 @@ setTimeout(() => {
   afficherPB.innerHTML = "HighScore : " + highscore;
   if (usernamePlayer != null)
     afficherHello.innerHTML = "Welcome " + usernamePlayer;
-}, 15000);
+}, 2000);
 
 idIntervalVitesse = 0;
 idAjoutpiece = 0;
