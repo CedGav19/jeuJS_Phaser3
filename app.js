@@ -28,8 +28,8 @@ var score = 0;
 var highscore = 0;
 setTimeout(getPB, 500); // fonction lien avec bdd et initialise highscore si l'utilisateur est connecte
 var evt;
-var Vitesse = -220;
-var VitesseBarryVol = -220;
+var Vitesse = -250;
+var VitesseBarryVol = -230;
 var vie = 1;
 afficherHighScore = document.getElementById("highScore");
 afficherScore = document.getElementById("score");
@@ -185,16 +185,16 @@ function create() {
     });
     premierLancement = false;
   }
-  Vitesse = -220;
-  VitesseBarryVol = -220;
+  Vitesse = -250;
+  VitesseBarryVol = -230;
   clearInterval(idIntervalVitesse);
   clearInterval(idAjoutpiece);
   clearInterval(idAjoutzap);
   clearInterval(idAjoutrocket);
   clearInterval(idAjoutNuage);
-  idIntervalVitesse = setInterval(AugmenterVitesse, 3000);
-  idAjoutpiece = setInterval(ajoutPieces, 6300);
-  idAjoutzap = setInterval(ajoutZapper, 6100);
+  idIntervalVitesse = setInterval(AugmenterVitesse, 1500);
+  idAjoutpiece = setInterval(ajoutPieces, 7200);
+  idAjoutzap = setInterval(ajoutZapper, 7000);
   idAjoutrocket = setInterval(ajoutRocket, 4500);
   idAjoutNuage = setInterval(ajoutNuage, 6000);
 }
@@ -230,8 +230,8 @@ function gameOver() {
     //reset des donnée de départ
     vie = 1;
     score = 0;
-    Vitesse = -220;
-    VitesseBarryVol = -220;
+    Vitesse = -250;
+    VitesseBarryVol = -230;
     game.config.physics.arcade.gravity.y = 370;
     document.getElementsByClassName("menuFin")[0].style.display = "none";
     this.scene.restart(); //relance le jeu
@@ -250,12 +250,13 @@ function ajoutNuage() {
 }
 
 function ajoutZapper() {
+  const vit = Vitesse;
   if (present == true) {
     //console.log("ajout zapper");
     let tmpal = Math.random() * 10;
     (zone1 = false), (zone2 = false), (zone3 = false), (zone4 = false);
     i = 0;
-    while (i < (parseInt(tmpal, 10) % 4) + 2) {
+    while (i < (parseInt(tmpal, 10) % 3) + 3) {
       let heightRandom = parseInt((Math.random() * 10) % 4);
 
       switch (heightRandom) {
@@ -303,7 +304,7 @@ function ajoutZapper() {
           heightRandom - ground.height,
           "zap"
         );
-        zapper.setVelocityX(Vitesse);
+        zapper.setVelocityX(vit);
         zapper.body.allowGravity = false;
         zapper.setBodySize(60, 215);
         if (parseInt((Math.random() * 10) % 4) == 3) {
@@ -321,7 +322,7 @@ function ajoutZapper() {
 function ajoutRocket() {
   if (present == true && score > 100) {
     //console.log("ajout de fusee ");
-    rocket = fusee.create(game.config.width * 1.5, Barry.y, "rocket");
+    rocket = fusee.create(game.config.width * 1.25, Barry.y, "rocket");
     rocket.setVelocityX(Vitesse * 2);
     rocket.setBodySize(45, 25);
     rocket.body.allowGravity = false;
@@ -471,9 +472,9 @@ function AugmenterVitesse() {
       clearInterval(idIntervalVitesse);
       //  console.log("vitesse Maximale");
     } else {
-      Vitesse -= 10;
-      game.config.physics.arcade.gravity.y += 7;
-      VitesseBarryVol -= 3;
+      Vitesse -= 5;
+      game.config.physics.arcade.gravity.y += 3;
+      VitesseBarryVol -= 2;
     }
   }
 }
